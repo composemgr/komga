@@ -47,8 +47,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/komga` - Data storage
-- `./rootfs/data/komga` - Data storage
+- `./volumes/config/komga` - Data storage
+- `./volumes/data/komga` - Data storage
 
 ## 🔍 Logging
 
