@@ -16,12 +16,16 @@ services:
     logging: *default-logging
     networks:
       - komga
+      - proxy
+      - cloudflare
     ports:
       - "172.17.0.1:25600:25600"
     environment:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
+      CONTAINER_NAME: komga-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/komga:/config
       - ./volumes/data/komga:/data
@@ -30,8 +34,28 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://komga-app:25600'
+      - 'cloudflare.hostname=komga.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.komga-app.entrypoints=http'
+      - 'traefik.http.routers.komga-app-secure.tls=true'
+      - 'traefik.http.routers.komga-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.komga-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.komga-app.middlewares=komga-app-https-redirect'
+      - 'traefik.http.routers.komga-app-secure.entrypoints=https'
+      - 'traefik.http.routers.komga-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.komga-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.komga-app-secure.service=komga-app'
+      - 'traefik.http.services.komga-app.loadbalancer.server.port=25600'
 
 networks:
   komga:
     name: komga
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
