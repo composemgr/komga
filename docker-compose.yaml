@@ -13,6 +13,7 @@ services:
     pull_policy: always
     container_name: komga-app
     restart: always
+    user: "${SERVICE_USER:-1000}:${SERVICE_GROUP:-1000}"
     logging: *default-logging
     networks:
       - komga
@@ -22,8 +23,6 @@ services:
       - "172.17.0.1:25600:25600"
     environment:
       TZ: ${TZ:-America/New_York}
-      PUID: ${SERVICE_USER:-1000}
-      PGID: ${SERVICE_GROUP:-1000}
       CONTAINER_NAME: komga-app
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
