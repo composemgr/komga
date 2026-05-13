@@ -1,5 +1,6 @@
 # nginx proxy address - http://172.17.0.1:25600
 
+name: komga
 x-logging: &default-logging
   driver: json-file
   options:
@@ -9,13 +10,14 @@ x-logging: &default-logging
 services:
   komga:
     image: gotson/komga:latest
+    pull_policy: always
     container_name: komga-app
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     networks:
       - komga
     ports:
-      - "25600:25600"
+      - "172.17.0.1:25600:25600"
     environment:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
@@ -31,4 +33,5 @@ services:
 
 networks:
   komga:
+    name: komga
     external: false
